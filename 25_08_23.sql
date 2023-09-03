@@ -1,0 +1,301 @@
+create database learn_sql;
+
+use learn_sql;
+
+-- Create the 'departments' table
+CREATE TABLE departments (
+    department_id INT PRIMARY KEY,
+    department_name VARCHAR(50)
+);
+
+INSERT INTO departments (department_id, department_name) VALUES
+    (1, 'HR'),
+    (2, 'Finance'),
+    (3, 'Management');
+    
+-- Create the 'employees' table
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY,
+    employee_name VARCHAR(50),
+    salary DECIMAL(10, 2),
+    department_id INT,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
+
+-- Insert data into the 'employees' table
+INSERT INTO employees (employee_id, employee_name, salary, department_id) VALUES
+    (1, 'Alice', 50000, 1),
+    (2, 'Bob', 60000, 2),
+    (3, 'Carol', 55000, 1),
+    (4, 'David', 65000, 2),
+    (5, 'Eve', 48000, 1),
+    (6, 'Frank', 70000, 3),
+    (7, 'Grace', 52000, 1),
+    (8, 'Harry', 75000, 2),
+    (9, 'Irene', 60000, 3),
+    (10, 'Jack', 58000, 1),
+    (11, 'Karen', 72000, 2),
+    (12, 'Larry', 51000, 1),
+    (13, 'Mary', 69000, 3),
+    (14, 'Nathan', 64000, 2),
+    (15, 'Olivia', 50000, 1),
+    (16, 'Paul', 67000, 2),
+    (17, 'Rachel', 53000, 1),
+    (18, 'Sam', 71000, 3),
+    (19, 'Tom', 59000, 1),
+    (20, 'Ulysses', 66000, 2),
+    (21, 'Valerie', 54000, 1),
+    (22, 'Walter', 68000, 3),
+    (23, 'Xavier', 62000, 2),
+    (24, 'Yvonne', 52000, 1),
+    (25, 'Zelda', 70000, 3),
+    (26, 'Aaron', 48000, 1),
+    (27, 'Bella', 71000, 2),
+    (28, 'Caleb', 53000, 1),
+    (29, 'Daniel', 66000, 3),
+    (30, 'Emily', 59000, 1);
+    
+alter table employees rename e;  # RENAMING THE TABLE NAME
+alter table departments rename d; 
+
+SELECT * FROM E; # FETCHING ALL RECORDS FROM TEBLE. NOTE -> APPEND ONE NULL FIELD AT THE END
+
+# CREATE A NEW TABLE FROM ALREADY EXISTING table 
+CREATE TABLE EMP AS SELECT * FROM E; # CREATING NEW TABLE WITH EXISTING TABLE HAVING ALL COLUMNS
+
+CREATE TABLE EMP_SPNAME 
+AS 
+SELECT EMPLOYEE_NAME AS NAME FROM E; # CREATING NEW TABLE WITH EXISTING TABLE HAVING SPECIFIC COLUMNS
+
+-- 1. Find the names of all employees.
+select employee_name from e;
+
+-- 2. Find the names of employees who work in the 'Finance' department.
+SELECT E.EMPLOYEE_NAME, D.DEPARTMENT_NAME FROM E
+	LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID 
+    WHERE D.DEPARTMENT_NAME = 'Finance'; # SELECT ONLY THOSE WHO ARE HAVING DEPARTMNT NAME AS FINANCE
+
+-- 3. Find the names of employees who earn more than $60,000.
+SELECT E.EMPLOYEE_NAME, SALARY FROM E WHERE E.SALARY > 60000;
+
+-- 4. Find the highest salary among all employees.
+SELECT E.EMPLOYEE_NAME, E.SALARY FROM E 
+WHERE E.SALARY = 
+(SELECT MAX(SALARY) FROM E); # RETURN MAX OF SALARY
+
+-- 5. Find the average salary of employees in the 'Finance' department.
+SELECT D.DEPARTMENT_NAME , AVG(E.SALARY) AS AVERAGE_SALARY
+		FROM E LEFT JOIN D ON D.DEPARTMENT_ID = E.DEPARTMENT_ID
+        GROUP BY E.DEPARTMENT_ID
+        HAVING D.DEPARTMENT_NAME='Finance';   
+
+-- 6. Find the total number of employees in each department.
+SELECT  D.DEPARTMENT_NAME, COUNT(*) AS TOTAL_EMPLOYEE 
+	FROM E LEFT JOIN D ON D.DEPARTMENT_ID = E.DEPARTMENT_ID GROUP BY E.DEPARTMENT_ID;
+    
+    
+-- 7. Find the department with the most employees.
+SELECT  D.DEPARTMENT_NAME, COUNT(*) AS TOTAL_EMPLOYEE 
+	FROM E LEFT JOIN D ON D.DEPARTMENT_ID = E.DEPARTMENT_ID 
+    GROUP BY E.DEPARTMENT_ID ORDER BY TOTAL_EMPLOYEE DESC LIMIT 1;
+    
+-- 8. Find the department with the highest average salary.
+SELECT D.DEPARTMENT_NAME, AVG(E.SALARY) AS AVERAGE_SALARY FROM E 
+	LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID 
+    GROUP BY E.DEPARTMENT_ID
+    ORDER BY AVERAGE_SALARY DESC LIMIT 1; 
+	
+
+-- 9. Find the names of employees with salaries above the average salary.
+SELECT AVG(SALARY) FROM E;
+SELECT EMPLOYEE_NAME, SALARY FROM E WHERE SALARY >= (SELECT AVG(SALARY) FROM E);
+
+-- 10. Find the employees with the top 3 salaries.
+SELECT EMPLOYEE_NAME, SALARY FROM E ORDER BY SALARY LIMIT 3;
+
+-- 11. Find the department with the lowest total salary.
+SELECT D.DEPARTMENT_NAME, SUM(E.SALARY) AS TOTAL_SALARY FROM E 
+LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+GROUP BY E.DEPARTMENT_ID 
+ORDER BY TOTAL_SALARY LIMIT 1;
+
+SELECT * FROM E;
+SELECT * FROM D;
+INSERT INTO E(EMPLOYEE_ID, EMPLOYEE_NAME, SALARY) VALUES(43, 'Amit', 90000);
+
+-- 12. Find the names of employees who don't belong to any department.
+SELECT * FROM E WHERE DEPARTMENT_ID IS NULL;
+
+-- 13. Find the department names and the number of employees in each department.
+SELECT D.DEPARTMENT_NAME, COUNT(*) AS TOTAL_EMPLOYEE 
+FROM E LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+GROUP BY E.DEPARTMENT_ID  # GROUPING BY DEPARTMENT ID
+HAVING D.DEPARTMENT_NAME IS NOT NULL ; # DEPARTMENT SHOULD NOT BE NULL
+
+
+-- 14. Find the employee with the lowest salary.
+SELECT EMPLOYEE_NAME, SALARY FROM E 
+ORDER BY SALARY LIMIT 1; # IT WOULD GIVE ONLY ONE RECORD IF THERE ARE MULTIPLE EMPLOYEE WITH LOWEST SALARY
+
+# IT WOULD GIVE ALL THE RECORDS HAVING LOWEST SALARY
+SELECT EMPLOYEE_NAME, SALARY FROM E
+WHERE SALARY = 
+(SELECT MIN(SALARY) FROM E); # GET MINIMUM OF SALARY
+
+-- 15. Find the employee with the highest salary in the 'Finance' department.
+INSERT INTO E VALUES(89, 'Harry', 75000, 2);
+
+SELECT EMPLOYEE_NAME, E.SALARY, D.DEPARTMENT_NAME FROM E 
+LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID 
+WHERE D.DEPARTMENT_NAME = 'Finance' AND 
+E.SALARY = # FOLLOWING PART WILL RETRIVE MAX SALRY OF EMPLOYEE IN FINANCE DEPT
+(SELECT MAX(E.SALARY) FROM E 
+LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID 
+WHERE D.DEPARTMENT_NAME = 'Finance');
+
+-- 16. Find the names of employees who earn more than the lowest salary in the 'HR' department.
+SELECT EMPLOYEE_NAME, SALARY, D.DEPARTMENT_NAME FROM E 
+	LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID 
+	WHERE SALARY >
+	# FOLLOWING QUERY WILL RETURN MIN SALARY HR DEPARTMENT
+	(SELECT MIN(E.SALARY) FROM E 
+	LEFT JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID 
+	WHERE D.DEPARTMENT_NAME = 'HR');
+    
+-- 17. Find the employees with salaries in the range of $50,000 to $60,000.
+SELECT EMPLOYEE_NAME, SALARY FROM E WHERE SALARY BETWEEN 50000 AND 60000;
+
+-- 18. Find the names of employees who earn the same salary as 'Bob'.
+SELECT EMPLOYEE_NAME, SALARY FROM E WHERE 
+SALARY = 
+(SELECT SALARY FROM E WHERE EMPLOYEE_NAME = 'Bob') # GET SALARY OF BOB
+AND
+EMPLOYEE_NAME != 'Bob'; # DOESN'T INCLUDE BOB IN RETURN SET
+
+-- 19. Find the names of employees who belong to the same department as 'Alice'.
+SELECT EMPLOYEE_NAME, DEPARTMENT_ID FROM E
+	WHERE E.DEPARTMENT_ID = 
+    (SELECT DEPARTMENT_ID FROM E WHERE EMPLOYEE_NAME = 'Alice') # GET ID OF DEPARTMENT OF ALICE
+	AND EMPLOYEE_NAME != 'Alice';
+
+
+-- 20. Find the employees who earn more than 'Bob' but less than 'David'.
+# EXTRACT SALARY OF BOB AND DAVID
+SELECT SALARY FROM E WHERE EMPLOYEE_NAME = 'Bob';
+SELECT SALARY FROM E WHERE EMPLOYEE_NAME = 'David';
+
+SELECT EMPLOYEE_NAME, SALARY FROM E WHERE 
+	SALARY > (SELECT SALARY FROM E WHERE EMPLOYEE_NAME = 'Bob')
+    AND 
+    SALARY < (SELECT SALARY FROM E WHERE EMPLOYEE_NAME = 'David');
+
+-- 21. Find the names of employees who have the letter 'a' in their names.
+SELECT EMPLOYEE_NAME FROM E WHERE EMPLOYEE_NAME LIKE "%A%";
+
+-- 22. Find the employees whose names start with 'A'.
+SELECT EMPLOYEE_NAME FROM E WHERE EMPLOYEE_NAME LIKE "A%";
+
+-- 23. Find the names of employees who have a 'y' in their names and earn more than $55,000.
+SELECT EMPLOYEE_NAME, SALARY FROM E 
+	WHERE 
+    EMPLOYEE_NAME LIKE "%Y%" # CHECK WETHER NAME CONTAINS Y OR NOT
+    AND SALARY > 55000; # WHETHER THE SALARY IS MORE THAN 55000
+
+-- 24. Find the employees who don't earn more than 'Carol'.
+SELECT EMPLOYEE_NAME, SALARY FROM E 
+	WHERE
+	SALARY < (SELECT SALARY FROM E WHERE EMPLOYEE_NAME = 'CAROL');
+
+-- 25. Find the names of employees who earn the highest salary in their department.
+# GET MAX SALARY OF EACH DEPARTMENT
+SELECT MAX(SALARY), DEPARTMENT_ID FROM E GROUP BY E.DEPARTMENT_ID;
+
+SELECT EMPLOYEE_NAME, SALARY, DEPARTMENT_ID FROM E 
+	WHERE SALARY IN 
+	(
+		SELECT MAX(SALARY) FROM E AS E1
+        GROUP BY E1.DEPARTMENT_ID
+        HAVING E1.DEPARTMENT_ID = E.DEPARTMENT_ID
+    )
+	AND DEPARTMENT_ID IS NOT NULL 
+	ORDER BY DEPARTMENT_ID;
+
+-- 26. Find the names of employees who earn more than the average salary of employees in the 'Finance' department.
+
+# GET AVERAGE SALARY OF FINANCE DEPARTMENT
+SELECT AVG(SALARY) FROM E 
+GROUP BY DEPARTMENT_ID 
+HAVING DEPARTMENT_ID = 
+(SELECT DEPARTMENT_ID FROM D WHERE DEPARTMENT_NAME = 'FINANCE');
+
+SELECT EMPLOYEE_NAME, SALARY, DEPARTMENT_ID FROM E 
+WHERE SALARY > 
+		(
+		SELECT AVG(SALARY) FROM E 
+		GROUP BY DEPARTMENT_ID 
+		HAVING DEPARTMENT_ID = 
+			(
+			SELECT DEPARTMENT_ID FROM D WHERE DEPARTMENT_NAME = 'FINANCE'
+			)
+		)
+	AND DEPARTMENT_ID != (SELECT DEPARTMENT_ID FROM D WHERE DEPARTMENT_NAME = 'FINANCE');
+
+-- 27. Find the department names where the total salary is greater than $700,000.
+SELECT DEPARTMENT_NAME, SUM(E.SALARY) AS TOTAL_SALARY FROM E
+	LEFT JOIN D 
+    ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+    GROUP BY E.DEPARTMENT_ID
+    HAVING TOTAL_SALARY > 700000; 
+
+
+-- 28. Find the names of employees who belong to the department with the lowest total salary.
+# GETTING MIN SALARY OF EACH DEPARTMENT
+SELECT D.DEPARTMENT_NAME, MIN( E.SALARY) AS SALARY
+FROM E JOIN D 
+ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+GROUP BY E.DEPARTMENT_ID;
+
+# SELECTING EMPLOYEE NAME HAVING MINIMUM SALARY
+SELECT E.EMPLOYEE_NAME, D.DEPARTMENT_NAME, E.SALARY
+FROM E JOIN D 
+ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+WHERE E.SALARY = (SELECT MIN(SALARY) FROM E E1 WHERE E1.DEPARTMENT_ID = E.DEPARTMENT_ID);
+
+-- 29. Find the names of employees who have the same salary as 'Nathan' and belong to the same department.
+SELECT E.EMPLOYEE_NAME, E.SALARY, D.DEPARTMENT_NAME 
+FROM E JOIN D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID 
+WHERE E.DEPARTMENT_ID = (SELECT E1.DEPARTMENT_ID FROM E E1 WHERE E1.EMPLOYEE_NAME = 'NATHAN')
+AND
+E.SALARY = (SELECT E1.SALARY FROM E E1 WHERE E1.EMPLOYEE_NAME = 'NATHAN')
+AND 
+E.EMPLOYEE_NAME != 'NATHAN';
+
+-- 30. Find the employees who earn more than the second-highest salary in their department.
+
+# HIGHEST SALARY IN EACH DEPARTMENT
+SELECT MAX(E.SALARY), E.DEPARTMENT_ID FROM E WHERE DEPARTMENT_ID IS NOT NULL GROUP BY E.DEPARTMENT_ID;
+
+# SECONDE HIGHEST SALARY
+SELECT MAX(E1.SALARY) AS SECOND_MAX, E1.DEPARTMENT_ID FROM E E1 WHERE E1.SALARY < 
+(
+	SELECT MAX(E2.SALARY) FROM E E2 WHERE E2.DEPARTMENT_ID = E1.DEPARTMENT_ID
+)
+GROUP BY E1.DEPARTMENT_ID;
+
+# NOW GET EMPLOYEE WHO SATISFY THE GIVEN CONDITION
+SELECT E.DEPARTMENT_ID, E.EMPLOYEE_NAME, E.SALARPRIMARYY FROM E WHERE E.SALARY > 
+(
+	SELECT MAX(E1.SALARY) FROM E E1 WHERE E1.SALARY < 
+	(
+            SELECT MAX(E2.SALARY) FROM E E2 WHERE E2.DEPARTMENT_ID = E.DEPARTMENT_ID
+    )
+)
+ORDER BY E.DEPARTMENT_ID;
+
+
+
+
+ 
+
+
+    
